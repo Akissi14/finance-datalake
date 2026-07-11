@@ -13,7 +13,6 @@ dependencies = [
     "mysql-connector-python>=9.0",
     "pymongo>=4.10",
     "yfinance>=0.2.40",
-    "torch>=2.2",
     "fastapi>=0.115",
     "uvicorn>=0.32",
     "numba>=0.60",

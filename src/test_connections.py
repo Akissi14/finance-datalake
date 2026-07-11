@@ -5,12 +5,12 @@ Ce script est le point de controle de l'environnement. Il doit passer au vert
 AVANT d'ecrire la moindre ligne de pipeline : si une zone n'est pas joignable,
 tous les scripts suivants echoueront de toute facon.
 
-    Raw     -> LocalStack (S3)   sur localhost:4566
-    Staging -> MySQL             sur localhost:3306
-    Curated -> MongoDB           sur localhost:27017
+    Raw     -> MinIO (compatible S3)  sur localhost:9000
+    Staging -> MySQL                  sur localhost:3306
+    Curated -> MongoDB                sur localhost:27017
 
 Usage:
-    docker compose up -d
+    docker compose up -d minio mysql mongodb
     (attendre ~30s que MySQL s'initialise)
     python src/test_connections.py
 """
@@ -22,33 +22,40 @@ import pymongo
 from botocore.exceptions import BotoCoreError, ClientError
 
 
-def test_s3(endpoint_url, bucket):
+def test_s3(endpoint_url, bucket, access_key, secret_key):
     """
-    Verifie que la zone Raw (LocalStack S3) est joignable.
+    Verifie que la zone Raw (MinIO, compatible S3) est joignable.
 
     Le test cree le bucket s'il n'existe pas, y depose un petit objet temoin,
     le relit, puis le supprime. Cela valide a la fois la connexion et les
     droits en ecriture/lecture.
 
+    MinIO expose la meme API que S3 : le client boto3 est donc identique a
+    celui qu'on utiliserait sur AWS, seul l'endpoint change.
+
     Parameters
     ----------
     endpoint_url : str
-        URL du service S3 (LocalStack en local).
+        URL du service S3 (MinIO en local).
     bucket : str
         Nom du bucket de la zone Raw.
+    access_key : str
+        Cle d'acces du service de stockage objet.
+    secret_key : str
+        Cle secrete du service de stockage objet.
 
     Returns
     -------
     bool
         True si la zone Raw est operationnelle.
     """
-    print("Test de connexion S3 (LocalStack)...")
+    print("Test de connexion S3 (MinIO)...")
     try:
         s3 = boto3.client(
             "s3",
             endpoint_url=endpoint_url,
-            aws_access_key_id="test",
-            aws_secret_access_key="test",
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
             region_name="us-east-1",
         )
 
@@ -132,7 +139,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Teste les connexions aux trois zones du data lake."
     )
-    parser.add_argument("--s3-endpoint", type=str, default="http://localhost:4566")
+    parser.add_argument("--s3-endpoint", type=str, default="http://localhost:9000")
+    parser.add_argument("--s3-access-key", type=str, default="minioadmin")
+    parser.add_argument("--s3-secret-key", type=str, default="minioadmin")
     parser.add_argument("--bucket", type=str, default="raw")
     parser.add_argument("--db-host", type=str, default="localhost")
     parser.add_argument("--db-user", type=str, default="root")
@@ -141,12 +150,14 @@ def main():
     parser.add_argument("--mongo-uri", type=str, default="mongodb://localhost:27017/")
     args = parser.parse_args()
 
-    s3_ok = test_s3(args.s3_endpoint, args.bucket)
+    s3_ok = test_s3(
+        args.s3_endpoint, args.bucket, args.s3_access_key, args.s3_secret_key
+    )
     mysql_ok = test_mysql(args.db_host, args.db_user, args.db_password, args.db_name)
     mongo_ok = test_mongodb(args.mongo_uri)
 
     print("\n--- Resume ---")
-    print(f"Raw     (S3)      : {'OK' if s3_ok else 'ECHEC'}")
+    print(f"Raw     (MinIO)   : {'OK' if s3_ok else 'ECHEC'}")
     print(f"Staging (MySQL)   : {'OK' if mysql_ok else 'ECHEC'}")
     print(f"Curated (MongoDB) : {'OK' if mongo_ok else 'ECHEC'}")
 
