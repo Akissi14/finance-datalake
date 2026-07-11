@@ -1,0 +1,21 @@
+# Environnement Python
+.venv/
+__pycache__/
+*.pyc
+uv.lock
+
+# Donnees (jamais versionnees : le data lake se reconstruit via les pipelines)
+data/
+!data/.gitkeep
+
+# Artefacts Airflow
+logs/
+plugins/
+
+# Secrets
+.env
+kaggle.json
+
+# IDE
+.vscode/
+.idea/
