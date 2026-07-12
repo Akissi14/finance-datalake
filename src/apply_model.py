@@ -238,6 +238,7 @@ def main():
     parser.add_argument("--s3-access-key", type=str, default="minioadmin")
     parser.add_argument("--s3-secret-key", type=str, default="minioadmin")
     parser.add_argument("--tickers", type=str, default=None)
+    parser.add_argument("--batch-size", type=int, default=20000)
     args = parser.parse_args()
 
     # 1. Recharger le modele
@@ -279,7 +280,7 @@ def main():
             return
 
         print(f"\nScoring de {to_score} documents...")
-        scored, anomalies = apply_scores(coll, artifact, query)
+        scored, anomalies = apply_scores(coll, artifact, query,  args.batch_size)
 
     except PyMongoError as e:
         print(f"ERREUR : zone Curated injoignable ({e}).")

@@ -3,7 +3,7 @@ name = "finance-datalake"
 version = "0.1.0"
 description = "Projet final - Data Lake financier (S&P 500 + yfinance) avec detection d'anomalies"
 readme = "README.md"
-requires-python = "==3.10"
+requires-python = ">=3.10"
 
 dependencies = [
     "pandas==2.0",
@@ -17,7 +17,8 @@ dependencies = [
     "uvicorn==0.32",
     "numba==0.60",
     "tqdm==4.67",
-    "kaggle==1.6"
+    "kaggle==1.6",
+    "requests"
 ]
 
 [tool.uv]
