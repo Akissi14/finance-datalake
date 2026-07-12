@@ -6,7 +6,7 @@ Data lake structuré en trois zones **Raw → Staging → Curated**, alimenté p
 hétérogènes (505 fichiers CSV et une API REST), orchestré par **Apache Airflow**, enrichi par
 un **autoencodeur** de détection d'anomalies, et exposé via une **API Gateway FastAPI**.
 
-> 📄 **L'analyse complète — architecture, choix techniques, résultats, benchmarks et
+> **L'analyse complète — architecture, choix techniques, résultats, benchmarks et
 > limites — se trouve dans [`Rapport_technique.pdf`](Rapport_technique.pdf).**
 > Ce README explique uniquement **comment lancer le projet**.
 
@@ -88,7 +88,7 @@ kaggle datasets download camnugent/sandp500 -p data/ --unzip
 rm -rf data/individual_stocks_5yr/__MACOSX
 ```
 
-> ⚠️ L'archive Kaggle contient un **dossier imbriqué**
+> L'archive Kaggle contient un **dossier imbriqué**
 > (`data/individual_stocks_5yr/individual_stocks_5yr/`) ainsi qu'un dossier résiduel
 > `__MACOSX`. Les scripts pointent sur le sous-répertoire effectif.
 
@@ -107,7 +107,7 @@ python src/train_model.py                    # entraîne l'autoencodeur
 python src/apply_model.py                    # score tous les documents
 ```
 
-⏱️ Compter ~15 min au total (dont 3-5 min pour le chargement des 619 000 cotations).
+ Compter ~15 min au total (dont 3-5 min pour le chargement des 619 000 cotations).
 
 ### Option B — via Airflow
 
@@ -179,7 +179,7 @@ python src/benchmark.py --repetitions 10
 Compare `/ingest` et `/ingest_fast` sur un lot d'**1 élément** et de **100 éléments**.
 L'endpoint optimisé atteint **52 % de gain** sur le lot de 100 (×2,09).
 
-📄 *Analyse détaillée — méthodologie de mesure, loi d'Amdahl, et les deux optimisations
+*Analyse détaillée — méthodologie de mesure, loi d'Amdahl, et les deux optimisations
 mesurées puis abandonnées — au §8 du rapport technique.*
 
 ---
@@ -204,9 +204,9 @@ Il a par ailleurs mis au jour un **défaut du jeu de données source** : le data
 n'est pas ajusté des opérations sur titres (splits, spin-offs), qui apparaissent donc comme
 des chutes de 50 à 60 %.
 
-📄 *Chiffres précis, validation, limites et pistes d'amélioration : voir le rapport technique.*
+*Chiffres précis, validation, limites et pistes d'amélioration : voir le rapport technique.*
 
-> ⚠️ **Sur la reproductibilité** : l'échantillon d'entraînement est tiré par l'opérateur
+>  **Sur la reproductibilité** : l'échantillon d'entraînement est tiré par l'opérateur
 > `$sample` de MongoDB, qui **n'accepte aucun germe aléatoire**. Une réexécution de
 > `train_model.py` produit donc des valeurs *voisines* mais non identiques (seuil ~2,45,
 > anomalies ~1 %). Cette limite est documentée au §9.4 du rapport.
