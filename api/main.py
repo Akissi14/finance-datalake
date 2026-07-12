@@ -424,7 +424,30 @@ def _build_document(quote, features, score, threshold, endpoint):
 # Endpoints de lecture
 # ---------------------------------------------------------------------------
 
+@app.get("/")
+def root():
+    """
+    Point d'entree de l'API.
 
+    Une racine qui renvoie 404 laisse l'utilisateur sans indice. On lui expose
+    plutot la carte des endpoints disponibles et le lien vers la documentation
+    interactive : une API doit etre decouvrable sans lire son code source.
+    """
+    return {
+        "service": "Finance Data Lake - API Gateway",
+        "version": "1.0.0",
+        "documentation": "/docs",
+        "endpoints": {
+            "GET /health": "etat des trois zones du lac",
+            "GET /stats": "volumetrie de remplissage",
+            "GET /raw": "inventaire des objets de la zone Raw (MinIO)",
+            "GET /staging": "cotations de la zone Staging (MySQL)",
+            "GET /curated": "documents enrichis et scores (MongoDB)",
+            "POST /ingest": "ingestion a chaud, implementation de reference",
+            "POST /ingest_fast": "ingestion a chaud, implementation optimisee",
+        },
+    }
+ 
 @app.get("/health")
 def health():
     """Etat des trois zones du lac."""
