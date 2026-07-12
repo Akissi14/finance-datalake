@@ -74,6 +74,11 @@ Le sujet exige **deux sources** : un dataset fichier et une API.
 |---|---|---|---|
 | **Kaggle `camnugent/sandp500`** | 505 fichiers CSV | Cotations journalières des 505 valeurs du S&P 500, 2013-2018 | 619 040 lignes |
 | **Yahoo Finance (`yfinance`)** | API REST | Cotations récentes, ré-ingérées toutes les heures par Airflow | flux continu |
+**Références :**
+- **Dataset Kaggle** — *S&P 500 stock data*, Cam Nugent, licence CC0 1.0 (domaine public) :
+  <https://www.kaggle.com/datasets/camnugent/sandp500>
+- **API Yahoo Finance** — via la bibliothèque `yfinance` :
+  <https://pypi.org/project/yfinance/>
 
 Les deux sources convergent sur le **même schéma** (`date, open, high, low, close, volume, ticker`),
 ce qui permet de les faire atterrir dans une **table Staging unique**. C'est précisément le rôle
