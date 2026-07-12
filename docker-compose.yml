@@ -75,16 +75,10 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
       - ./src:/opt/airflow/scripts
       - ./data:/opt/airflow/data
     command: >
-      bash -c "
-        airflow db init &&
-        airflow users delete --username airflow || true &&
-        airflow users create --username airflow --password airflow
-          --firstname Admin --lastname User --role Admin --email admin@example.com
-      "
+      bash -c "airflow db init && airflow users delete --username airflow || true && airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com"
 
   airflow-webserver:
     image: finance-datalake-airflow:latest
@@ -98,7 +92,6 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY=data_lake_secret_key
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
       - ./src:/opt/airflow/scripts
       - ./data:/opt/airflow/data
     ports:
@@ -116,7 +109,6 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
     volumes:
       - ./dags:/opt/airflow/dags
-      - ./logs:/opt/airflow/logs
       - ./src:/opt/airflow/scripts
       - ./data:/opt/airflow/data
     command: scheduler
