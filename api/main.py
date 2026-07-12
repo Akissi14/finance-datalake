@@ -339,7 +339,7 @@ def _fetch_histories(tickers, max_workers=16):
 
     if not tickers:
         return {}
-        
+
     # Un seul ticker : creer un pool de threads pour paralleliser UNE requete
     # couterait plus cher que la requete elle-meme (creation, synchronisation
     # et destruction des threads). Le surcout de coordination du parallelisme
@@ -374,9 +374,22 @@ def _archive_payload(payload, suffix):
 
     return key
 
-
 def _build_document(quote, features, score, threshold, endpoint):
-    """Construit le document Curated d'une cotation ingeree a chaud."""
+    """
+    Construit le document Curated d'une cotation ingeree a chaud.
+
+    Le pipeline batch ecrit ma_5 et ma_20 ; l'API doit ecrire le MEME schema,
+    sans quoi train_model.py, qui echantillonne au hasard dans la collection,
+    tombe sur un document incompatible (KeyError: 'ma_20'). Une base sans schema
+    n'exempte pas d'un contrat : elle en deplace seulement la responsabilite du
+    moteur vers l'application.
+
+    Les moyennes mobiles sont reconstituees a partir des features, qui sont des
+    ratios sans echelle : features[7] = close / ma_20 et features[6] = ma_5 / ma_20.
+    """
+    ma_20 = quote["close"] / features[7] if features[7] else 0.0
+    ma_5 = ma_20 * features[6]
+
     return {
         "ticker": quote["ticker"],
         "quote_date": datetime.fromisoformat(quote["date"]),
@@ -395,8 +408,8 @@ def _build_document(quote, features, score, threshold, endpoint):
             "volume_ratio": features[3],
             "hl_range": features[4],
             "gap": features[5],
-            "ma_ratio": features[6],
-            "price_to_ma20": features[7],
+            "ma_5": ma_5,
+            "ma_20": ma_20,
         },
         "anomaly": {
             "score": float(score),
@@ -406,7 +419,6 @@ def _build_document(quote, features, score, threshold, endpoint):
         },
         "metadata": {"origin": endpoint},
     }
-
 
 # ---------------------------------------------------------------------------
 # Endpoints de lecture
